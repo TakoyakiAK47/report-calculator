@@ -186,11 +186,11 @@
             flex-shrink: 0;
         }
 
-        /* 色の入れ替え対応 */
+        /* Report Colors Correction */
         .icon-n { background: #8fb1bf; } /* 初級: 青灰色 */
         .icon-r { background: #56a5c1; } /* 中級: 水色 */
-        .icon-sr { background: #e8b059; } /* 上級: オレンジ(旧SSR色) */
-        .icon-ssr { background: #ba8bc6; } /* 最上級: 紫(旧SR色) */
+        .icon-sr { background: #e8b059; } /* 上級: オレンジ */
+        .icon-ssr { background: #ba8bc6; } /* 最上級: 紫 */
 
         .report-info {
             flex-grow: 1;
@@ -239,10 +239,6 @@
 
         .btn-step:active {
             transform: scale(0.95);
-        }
-
-        .btn-step:disabled {
-            background: #ccc;
         }
 
         footer {
@@ -359,21 +355,16 @@
 
 <script>
     /**
-     * Blue Archive Exp Table (Cumulative milestones from prompt)
+     * Blue Archive Exp Table (Cumulative milestones)
      */
     const MILESTONES = {
-        1: 0,
-        10: 540,
-        20: 2200,
-        30: 8690,
-        40: 21800,
-        50: 47295,
-        60: 110695,
-        70: 274720,
-        80: 613830,
-        90: 1249185
+        1: 0, 10: 540, 20: 2200, 30: 8690, 40: 21800, 
+        50: 47295, 60: 110695, 70: 274720, 80: 613830, 90: 1249185
     };
 
+    /**
+     * Get cumulative Exp for a specific level using Linear Interpolation
+     */
     function getExpForLevel(lv) {
         if (lv <= 1) return 0;
         if (lv >= 90) return MILESTONES[90];
@@ -397,6 +388,9 @@
         return Math.floor(lowerExp + (upperExp - lowerExp) * ratio);
     }
 
+    /**
+     * UI Step Control
+     */
     function step(type, delta) {
         const input = document.getElementById('qty-' + type);
         let val = parseInt(input.value) || 0;
@@ -405,6 +399,9 @@
         calculate();
     }
 
+    /**
+     * Main Calculation Logic
+     */
     function calculate() {
         const curLv = parseInt(document.getElementById('cur-lv').value) || 1;
         const tarLv = parseInt(document.getElementById('tar-lv').value) || 90;
@@ -414,6 +411,7 @@
         const r = parseInt(document.getElementById('qty-r').value) || 0;
         const n = parseInt(document.getElementById('qty-n').value) || 0;
 
+        // Persist Data
         localStorage.setItem('ba_reports', JSON.stringify({ssr, sr, r, n, curLv, tarLv}));
 
         const totalAvailableExp = (ssr * 10000) + (sr * 2000) + (r * 500) + (n * 50);
@@ -430,11 +428,13 @@
             nextNeeded = neededPerStudent - (totalAvailableExp % neededPerStudent);
         }
 
+        // Update UI
         document.getElementById('can-level-up').innerHTML = `${canLevelUp.toLocaleString()}<span class="result-unit">人</span>`;
         document.getElementById('total-exp').innerText = totalAvailableExp.toLocaleString();
         document.getElementById('next-needed').innerText = neededPerStudent > 0 ? nextNeeded.toLocaleString() : "0";
     }
 
+    // Initialize on Load
     window.onload = () => {
         const saved = localStorage.getItem('ba_reports');
         if (saved) {
@@ -449,8 +449,8 @@
         calculate();
     };
 
-    const inputs = document.querySelectorAll('input');
-    inputs.forEach(input => {
+    // Attach Input Listeners
+    document.querySelectorAll('input').forEach(input => {
         input.addEventListener('input', calculate);
     });
 </script>
